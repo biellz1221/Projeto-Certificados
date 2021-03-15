@@ -11,104 +11,124 @@
 <div class="engloba-tabelas">
     <div class="container">
         <div class="row">
-            <h4>Alunos Cadastrados:</h4>
-            <table class="table table-striped table-hover table-bordered table-sm">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Nome</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Nome Completo do Aluno</td>
-                    </tr>
-                </tbody>
-            </table>
-            <form class="input-group" action="/" method="GET">
-                <input type="text" name="alunos_aluno_nome" placeholder="Nome do Aluno" class="form-control" />
-                <button type="submit" class="btn btn-outline-success"><i class="bi bi-check2"></i></button>
-            </form>
+            <div class="col">
+                <h4>Alunos Cadastrados:</h4>
+                <table class="table table-striped table-hover table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each alunos}}
+                            <tr>
+                                <th scope="row">{{dataValues.id}}</th>
+                                <td>{{dataValues.nome}}</td>
+                                <td><a href="/excluir_aluno/{{dataValues.id}}" class="btn btn-outline-dark btn-sm"><i class="bi bi-trash"></i></a></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                <form class="input-group" action="/cadastra_aluno" method="POST">
+                    <input type="text" name="alunos_aluno_nome" placeholder="Nome do Aluno" class="form-control" />
+                    <button type="submit" class="btn btn-outline-success"><i class="bi bi-check2"></i></button>
+                </form>
+            </div>
         </div>
         <div class="row">
-            <h4>Cursos Cadastrados:</h4>
-            <table class="table table-striped table-hover table-bordered table-sm">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Nome</th>
-                        <th scope="col">Imagem</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Nome do Curso</td>
-                        <td>Imagem.jpg</td>
-                    </tr>
-                </tbody>
-            </table>
-            <form class="input-group" action="/" method="GET">
-                <input type="text" name="cursos_curso_nome" placeholder="Nome do Curso" class="form-control" />
-                <input type="file" name="cursos_curso_imagem" class="form-control" />
-                <button type="submit" class="btn btn-outline-success"><i class="bi bi-check2"></i></button>
-            </form>
+            <div class="col">
+                <h4>Cursos Cadastrados:</h4>
+                <table class="table table-striped table-hover table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Imagem</th>
+                            <th scope="col">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each cursos}}
+                            <tr>
+                                <th scope="row">{{dataValues.id}}</th>
+                                <td>{{dataValues.nome}}</td>
+                                <td>{{dataValues.imagem}}</td>
+                                <td><a href="/excluir_curso/{{dataValues.id}}" class="btn btn-outline-dark btn-sm"><i class="bi bi-trash"></i></a></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                <form class="input-group" action="/cadastra_curso" method="POST">
+                    <input type="text" name="cursos_curso_nome" placeholder="Nome do Curso" class="form-control" />
+                    <input type="file" name="cursos_curso_imagem" class="form-control" />
+                    <button type="submit" class="btn btn-outline-success"><i class="bi bi-check2"></i></button>
+                </form>
+            </div>
         </div>
         <div class="row">
-            <h4>Relação entre Alunos e Cursos:</h4>
-            <table class="table table-striped table-hover table-bordered table-sm">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Nome do Aluno</th>
-                        <th scope="col">Curso</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Nome Completo do Aluno</td>
-                        <td>Curso</td>
-                    </tr>
-                </tbody>
-            </table>
-            <form class="input-group" action="/" method="GET">
-                <select name="relacoes_aluno_id" class="form-select">
-                    <option selected>Escolha o Aluno</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                </select>
-                <select name="relacoes_curso_id" class="form-select" id="inputGroupSelect01">
-                    <option selected>Escolha o Curso</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                </select>
-                <button type="submit" class="btn btn-outline-success"><i class="bi bi-check2"></i></button>
-            </form>
+            <div class="col">
+                <h4>Relação entre Alunos e Cursos:</h4>
+                <table class="table table-striped table-hover table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome do Aluno</th>
+                            <th scope="col">Curso</th>
+                            <th scope="col">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each relacoes}}
+                            <tr>
+                                <th scope="row">{{dataValues.id}}</th>
+                                <td>{{dataValues.idaluno}}</td>
+                                <td>{{dataValues.idcurso}}</td>
+                                <td><a href="/excluir_relacao/{{dataValues.id}}" class="btn btn-outline-dark btn-sm"><i class="bi bi-trash"></i></a></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                <form class="input-group" action="/cadastra_relacao" method="POST">
+                    <select name="relacoes_aluno_id" class="form-select">
+                        <option selected>Escolha o Aluno</option>
+                        {{#each alunos}}
+                            <option value="{{dataValues.id}}">{{dataValues.nome}}</option>
+                        {{/each}}
+                    </select>
+                    <select name="relacoes_curso_id" class="form-select" id="inputGroupSelect01">
+                        <option selected>Escolha o Curso</option>
+                        {{#each cursos}}
+                            <option value="{{dataValues.id}}">{{dataValues.nome}}</option>
+                        {{/each}}
+                    </select>
+                    <button type="submit" class="btn btn-outline-success"><i class="bi bi-check2"></i></button>
+                </form>
+            </div>
         </div>
         <div class="row">
-            <h4>Certificados Emitidos:</h4>
-            <table class="table table-striped table-hover table-bordered table-sm">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Nome do Aluno</th>
-                        <th scope="col">Curso</th>
-                        <th scope="col">Link</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Nome Completo do Aluno</td>
-                        <td>Curso</td>
-                        <td><a href="#" class="link-primary">Certificado</a></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="col">
+                <h4>Certificados Emitidos:</h4>
+                <table class="table table-striped table-hover table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome do Aluno</th>
+                            <th scope="col">Curso</th>
+                            <th scope="col">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Nome Completo do Aluno</td>
+                            <td>Curso</td>
+                            <td><a class="link-primary" target="_blank" href="#">Certificado</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
