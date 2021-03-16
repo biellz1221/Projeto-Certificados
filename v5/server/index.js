@@ -1,26 +1,52 @@
-const express = require("express");
-const app = express();
-const handlebars = require("express-handlebars");
-const Aluno = require('./models/Aluno');
-const Curso = require('./models/Curso');
-const Relacao = require('./models/Relacao');
-
 // Configs
+    // Express
+    const express = require('express');
+    const app = express();
+
+    // Multer
+    const multer  = require('multer');
+    const multerConfig = require('./config/multer');
+
+    // Handlebars
+    const handlebars = require('express-handlebars');
+
+    // HTML to PDF
+    const html_to_pdf = require('html-pdf-node');
+    let html_options = { format: 'A4' };
+    app.use('/uploads', express.static('uploads'));
+
     // Template Engine
-    app.engine('handlebars', handlebars({ defaultLayout: 'main' }));
+    app.engine('handlebars', handlebars({
+        defaultLayout: 'main',
+        runtimeOptions: {
+            allowProtoPropertiesByDefault: true,
+            allowProtoMethodsByDefault: true,
+        }
+    }));
     app.set('view engine', 'handlebars');
 
     // Body Parser
     const bodyParser = require("body-parser");
+    const { sequelize, Sequelize } = require('./config/db');
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
+
+    // Models
+    const Aluno = require('./models/Aluno');
+    const Curso = require('./models/Curso');
+    const Relacao = require('./models/Relacao');
+    const PDF = require('./models/PDF');
 // End Configs
 
 // Rotas
     // Página Principal
     app.get('/', function(req, res) {
-        Promise.all([Aluno.findAll(), Curso.findAll(), Relacao.findAll()])
-        .then((data) => {
+        Promise.all([Aluno.findAll(), Curso.findAll(), Relacao.findAll({
+            include: [
+                { model: Aluno, otherKey: 'alunoid' },
+                { model: Curso, otherKey: 'cursoid' }
+            ]
+        })]).then(function(data) {
             res.render('index', {
                 alunos: data[0],
                 cursos: data[1],
@@ -34,7 +60,7 @@ const Relacao = require('./models/Relacao');
         Aluno.create({
             nome: req.body.alunos_aluno_nome
         }).then(function() {
-            res.redirect('/');
+            res.redirect('/#Alunos');
         }).catch(function() {
             res.send("Erro ao Cadastrar Aluno: " + erro);
         });
@@ -45,19 +71,19 @@ const Relacao = require('./models/Relacao');
         Aluno.destroy({ where: {
             'id': req.params.id
         }}).then(function() {
-            res.redirect('/');
+            res.redirect('/#Alunos');
         }).catch(function() {
             res.send("Erro ao Excluir Aluno: " + erro);
         });
     });
 
     // Adicionar Curso
-    app.post('/cadastra_curso', function(req, res) {
+    app.post('/cadastra_curso', multer(multerConfig).single('cursos_curso_imagem'), function(req, res) {
         Curso.create({
             nome: req.body.cursos_curso_nome,
-            imagem: req.body.cursos_curso_imagem
+            imagem: req.file.filename
         }).then(function() {
-            res.redirect('/');
+            res.redirect('/#Cursos');
         }).catch(function() {
             res.send("Erro ao Cadastrar Curso: " + erro);
         });
@@ -68,7 +94,7 @@ const Relacao = require('./models/Relacao');
         Curso.destroy({ where: {
             'id': req.params.id
         }}).then(function() {
-            res.redirect('/');
+            res.redirect('/#Cursos');
         }).catch(function() {
             res.send("Erro ao Excluir Curso: " + erro);
         });
@@ -77,10 +103,10 @@ const Relacao = require('./models/Relacao');
     // Adicionar Relação
     app.post('/cadastra_relacao', function(req, res) {
         Relacao.create({
-            idaluno: req.body.relacoes_aluno_id,
-            idcurso: req.body.relacoes_curso_id
+            alunoId: req.body.relacoes_aluno_id,
+            cursoId: req.body.relacoes_curso_id
         }).then(function() {
-            res.redirect('/');
+            res.redirect('/#Relacoes');
         }).catch(function() {
             res.send("Erro ao Cadastrar Relação: " + erro);
         });
@@ -91,9 +117,55 @@ const Relacao = require('./models/Relacao');
         Relacao.destroy({ where: {
             'id': req.params.id
         }}).then(function() {
-            res.redirect('/');
+            res.redirect('/#Relacoes');
         }).catch(function() {
             res.send("Erro ao Excluir Relação: " + erro);
+        });
+    });
+
+    // Gerar PDF do Certificado
+    app.get('/gerar_pdf/:aluno/:curso', function(req, res) {
+        
+        PDF.findOne({
+            where: { aluno: req.params.aluno, curso: req.params.curso }
+        }).then(function(item) {
+            // Envia o Link do PDF
+            res.redirect(item.link);
+        }).catch(function() {
+            sequelize.query("SELECT r.id, a.nome AS alunoNome, c.nome AS cursoNome, c.imagem AS cursoImagem FROM alunos a JOIN relacoes r ON a.id = r.alunoId JOIN cursos c ON r.cursoId = c.id WHERE a.nome = '" + req.params.aluno + "' AND c.nome = '" + req.params.curso + "';")
+            .then(function([item = []]) {
+                // Cria o PDF
+                var nome_do_aluno = item[0].alunoNome;
+                var nome_do_curso = item[0].cursoNome;
+                var imagem_do_curso = item[0].cursoImagem;
+                var link_do_pdf = "/pdfs/" + nome_do_curso.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '-').toLowerCase() + "-" + nome_do_aluno.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '-').toLowerCase() + ".pdf";
+                
+                handlebars.render("pdf", {
+                    nome_do_aluno: nome_do_aluno,
+                    nome_do_curso: nome_do_curso,
+                    imagem_do_curso: imagem_do_curso
+                }, function(err, html) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        html_to_pdf.create(html, { landscape: true }).toFile(link_do_pdf, function(err, res){ });
+                    }
+                });
+                
+                // Registra no Banco de Dados de PDFs
+                PDF.create({
+                    aluno: nome_do_aluno,
+                    curso: nome_do_curso,
+                    link: link_do_pdf
+                }).then(function() {
+                    // Envia o Link do PDF
+                    res.redirect('/#Relacoes');
+                }).catch(function() {
+                    res.send("Erro ao Cadastrar Relação: " + erro);
+                });
+            }).catch(function(){
+                console.log("Registro não encontrado!");
+            });
         });
     });
 // End Rotas
