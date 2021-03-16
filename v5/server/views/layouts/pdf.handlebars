@@ -7,7 +7,9 @@
     <title>Document</title>
 </head>
 <body>
-    {{ ${nome_do_aluno} }}
-    <img src="uploads/{{ ${imagem_do_curso} }}" />
+    {{#each PDF_Item}}
+        {{dataValues.alunoNome}}
+        <img src="uploads/{{ dataValues.cursoImagem }}" />
+    {{/each}}
 </body>
 </html>

@@ -120,20 +120,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Nome Completo do Aluno</td>
-                            <td>Curso</td>
-                            <td><a class="link-primary" target="_blank" href="#">Certificado</a></td>
-                        </tr>
+                        {{#each pdfs}}
+                            <tr>
+                                <th scope="row">{{dataValues.id}}</th>
+                                <td>{{dataValues.aluno}}</td>
+                                <td>{{dataValues.curso}}</td>
+                                <td><a class="link-primary" target="_blank" href="{{dataValues.link}}">Certificado</a></td>
+                            </tr>
+                        {{/each}}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-
-<a href="/gerar_pdf/Enzo José Ribeiro Dantas da Cunha/Português" target="_blank">Testando..</a>
 
 <style>
     .engloba-titulo { background: #e4efff; padding: 5em 0; }

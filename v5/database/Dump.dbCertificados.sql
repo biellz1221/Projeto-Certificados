@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `dbcertificados` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci */;
-USE `dbcertificados`;
 -- MySQL dump 10.13  Distrib 8.0.20, for Win64 (x86_64)
 --
 -- Host: localhost    Database: dbcertificados
@@ -52,8 +50,8 @@ DROP TABLE IF EXISTS `cursos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cursos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `imagem` blob,
+  `nome` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `imagem` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`id`)
@@ -66,8 +64,36 @@ CREATE TABLE `cursos` (
 
 LOCK TABLES `cursos` WRITE;
 /*!40000 ALTER TABLE `cursos` DISABLE KEYS */;
-INSERT INTO `cursos` VALUES (1,'Português',_binary 'fundo_01.jpg','2021-03-15 04:10:00','2021-03-15 04:10:00'),(2,'Matemática',_binary 'fundo_02.jpg','2021-03-15 04:10:19','2021-03-15 04:10:19'),(3,'Informática',_binary 'fundo_03.jpg','2021-03-15 04:10:32','2021-03-15 04:10:32'),(4,'Geografia',_binary 'fundo_04.jpg','2021-03-15 04:13:36','2021-03-15 04:13:36'),(5,'História',_binary 'fundo_05.jpg','2021-03-15 04:13:56','2021-03-15 04:13:56');
+INSERT INTO `cursos` VALUES (1,'Português','469319373bc4b3a4d3e0de15e7370d1c-fundo_01.jpg','2021-03-16 01:37:58','2021-03-16 01:37:58'),(2,'Matemática','cd9f059617ab032c9b4d36e392629acd-fundo_02.jpg','2021-03-16 01:38:12','2021-03-16 01:38:12'),(3,'Informática','743bd391d91a3c36399f87c624645fe5-fundo_03.jpg','2021-03-16 01:38:21','2021-03-16 01:38:21'),(4,'Geografia','62d8440df40f2505d803a34f50e92f33-fundo_04.jpg','2021-03-16 01:38:36','2021-03-16 01:38:36'),(5,'História','fc590e580dd73ba5668cafd4acc46dae-fundo_05.jpg','2021-03-16 01:38:45','2021-03-16 01:38:45');
 /*!40000 ALTER TABLE `cursos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pdfs`
+--
+
+DROP TABLE IF EXISTS `pdfs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pdfs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `aluno` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `curso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pdfs`
+--
+
+LOCK TABLES `pdfs` WRITE;
+/*!40000 ALTER TABLE `pdfs` DISABLE KEYS */;
+INSERT INTO `pdfs` VALUES (3,'João Pedro da Silva','Português','http://localhost:8081/pdfs/portugues-joao-pedro-da-silva.pdf','2021-03-16 17:20:37','2021-03-16 17:20:37'),(4,'Raphaela Albuquerque Lima Ribeiro Dantas Junior','Informática','http://localhost:8081/pdfs/informatica-raphaela-albuquerque-lima-ribeiro-dantas-junior.pdf','2021-03-16 23:25:00','2021-03-16 23:25:00');
+/*!40000 ALTER TABLE `pdfs` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -79,16 +105,16 @@ DROP TABLE IF EXISTS `relacoes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `relacoes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `idaluno` int(11) NOT NULL,
-  `idcurso` int(11) NOT NULL,
+  `alunoId` int(11) DEFAULT NULL,
+  `cursoId` int(11) DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `idaluno` (`idaluno`),
-  KEY `idcurso` (`idcurso`),
-  CONSTRAINT `relacoes_ibfk_1` FOREIGN KEY (`idaluno`) REFERENCES `alunos` (`id`),
-  CONSTRAINT `relacoes_ibfk_2` FOREIGN KEY (`idcurso`) REFERENCES `cursos` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  KEY `alunoId` (`alunoId`),
+  KEY `cursoId` (`cursoId`),
+  CONSTRAINT `relacoes_ibfk_1` FOREIGN KEY (`alunoId`) REFERENCES `alunos` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `relacoes_ibfk_2` FOREIGN KEY (`cursoId`) REFERENCES `cursos` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,6 +123,7 @@ CREATE TABLE `relacoes` (
 
 LOCK TABLES `relacoes` WRITE;
 /*!40000 ALTER TABLE `relacoes` DISABLE KEYS */;
+INSERT INTO `relacoes` VALUES (1,1,1,'2021-03-16 01:38:54','2021-03-16 01:38:54'),(2,2,2,'2021-03-16 01:39:01','2021-03-16 01:39:01'),(3,3,1,'2021-03-16 01:39:09','2021-03-16 01:39:09'),(4,4,5,'2021-03-16 01:39:17','2021-03-16 01:39:17'),(5,5,1,'2021-03-16 01:39:24','2021-03-16 01:39:24'),(6,6,4,'2021-03-16 01:39:31','2021-03-16 01:39:31'),(7,2,3,'2021-03-16 01:39:37','2021-03-16 01:39:37'),(8,4,3,'2021-03-16 01:39:45','2021-03-16 01:39:45');
 /*!40000 ALTER TABLE `relacoes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -113,4 +140,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-03-15 10:08:59
+-- Dump completed on 2021-03-16 20:29:51

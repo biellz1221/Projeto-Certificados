@@ -16,32 +16,19 @@
           <b-form>
             <!-- Campo Nome -->
             <label for="input-nome">Nome Completo:</label>
-            <b-form-input
-              id="input-nome"
-              aria-describedby="help-nome"
-              placeholder="Nome e Sobrenome"
-            ></b-form-input>
+            <b-form-input id="input-nome" v-model="inputnome" aria-describedby="help-nome" placeholder="Nome e Sobrenome"></b-form-input>
             <!-- Fim do Campo Nome -->
             <br />
-
             <!-- Campo Curso -->
             <label for="select-curso">Curso:</label>
-            <b-form-select
-              id="select-curso"
-              :options="[
-                { text: 'Escolha o Curso', value: null },
-                { text: 'Português', value: 1 },
-                { text: 'Matemática', value: 2 },
-                { text: 'Informática', value: 3 },
-              ]"
-              :value="null"
-            ></b-form-select>
+            <b-form-select v-model="selectcurso" id="select-curso">
+              <b-form-select-option v-bind:value="null">Escolha um Curso</b-form-select-option>
+              <b-form-select-option v-for="curso in cursos" v-bind:key="curso.id" v-bind:value="curso.nome">{{ curso.nome }}</b-form-select-option>
+            </b-form-select>
             <!-- Fim do Campo Curso -->
             <br />
             <br />
-            <b-button class="sm-10 md-10" variant="success"
-              >Gerar Certificado</b-button
-            >
+            <b-button class="sm-10 md-10" variant="success" v-on:click="geraCertificado(inputnome, selectcurso)">Gerar Certificado</b-button>
           </b-form>
         </b-col>
       </b-row>
@@ -50,8 +37,31 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
-  name: "Principal"
+  name: "Principal",
+  data() {
+    return {
+      inputnome: "",
+      selectcurso: null,
+      cursos: null
+    }
+  },
+  mounted() {
+    axios.get('http://localhost:8081/carrega_cursos')
+    .then( response => (this.cursos = response.data))
+  },
+  methods: {
+    geraCertificado(inputnome, selectcurso) {
+      if (inputnome != "" && selectcurso != null) {
+        window.location.href = 'http://localhost:8081/gerar_pdf/' + inputnome + '/' + selectcurso;
+
+        this.inputnome = null;
+        this.selectcurso = null;
+      }
+    }
+  }
 };
 </script>
 
