@@ -50,7 +50,7 @@ export default {
   },
   mounted() {
     axios.get('http://localhost:8081/carrega_cursos')
-    .then( response => (this.cursos = response.data))
+    .then( response => (this.cursos = response.data));
   },
   methods: {
     geraCertificado(inputnome, selectcurso) {

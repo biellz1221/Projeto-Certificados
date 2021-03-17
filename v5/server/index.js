@@ -196,7 +196,12 @@
 
     // Carrega Relações via Json
     app.get('/carrega_relacoes', function(req, res) {
-        Relacao.findAll().then(function(item) {
+        Relacao.findAll({
+            include: [
+                { model: Aluno, otherKey: 'alunoid' },
+                { model: Curso, otherKey: 'cursoid' }
+            ]
+        }).then(function(item) {
             return res.json(item);
         });
     });
