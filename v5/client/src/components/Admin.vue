@@ -46,12 +46,24 @@
       </b-row>
       <b-row>
         <b-col>
-          <template>
-            <div>
-              <h4><label for="tbl-certificados-emitidos">Certificados Emitidos:</label></h4>
-              <b-table id="tbl-certificados-emitidos" v-bind:items="certificadosemitidos" v-bind:fields="camposCertificadosEmitidos" striped bordered hover small></b-table>
-            </div>
-          </template>
+          <table class="table table-striped table-hover table-bordered table-sm">
+            <thead>
+              <tr>
+                <th data-sortable="true" data-field="id" scope="col">ID</th>
+                <th scope="col">Nome do Aluno</th>
+                <th scope="col">Curso</th>
+                <th scope="col">Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="certificado in certificadosemitidos" :key="certificado.id">
+                <th scope="row">{{certificado.id}}</th>
+                <td>{{certificado.aluno}}</td>
+                <td>{{certificado.curso}}</td>
+                <td><a class="link-primary" target="_blank" :href="certificado.link">Certificado</a></td>
+              </tr>
+            </tbody>
+          </table>
           <br />
         </b-col>
       </b-row>

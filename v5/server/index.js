@@ -129,53 +129,78 @@
 
     // Gerar PDF do Certificado
     app.get('/gerar_pdf/:aluno/:curso', function(req, res) {
-        // Tenta encontrar se o registro ja foi feito anteriormente
-        PDF.findOne({
-            where: { aluno: req.params.aluno, curso: req.params.curso }
-        }).then(function(item) {
-            // Envia o Link do PDF
-            res.redirect(item.link);
-        }).catch(function() { // Se não consta nos registros de PDFs, tenta encontrar nas Relações Existentes.
-            sequelize.query("SELECT r.id, a.nome AS alunoNome, c.nome AS cursoNome, c.imagem AS cursoImagem FROM alunos a JOIN relacoes r ON a.id = r.alunoId JOIN cursos c ON r.cursoId = c.id WHERE a.nome = '" + req.params.aluno + "' AND c.nome = '" + req.params.curso + "';")
-            .then(function([item = []]) {
-                // Variáveis para criar o PDF
-                var nome_do_aluno = item[0].alunoNome;
-                var nome_do_curso = item[0].cursoNome;
-                var imagem_do_curso = item[0].cursoImagem;
-                var caminho_imagem = "http://localhost:8081/uploads/" + imagem_do_curso;
-                var nome_do_pdf = nome_do_curso.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '-').toLowerCase() + "-" + nome_do_aluno.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '-').toLowerCase() + ".pdf";
-                var caminho_pdf = "http://localhost:8081/pdfs/" + nome_do_pdf;
-                var file = { content: `
-                <img src="${caminho_imagem}" style="display: block; position: fixed; top: 0; right: 0; width: 100%; height: 100%; z-index: 0;" />
-                <div style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; display: inline-table;">
-                    <div style="vertical-align: middle; display: table-cell; text-align: center; text-transform: uppercase; font-family: monospace; font-weight: bold; font-size: 3em; color: #272727; text-shadow: 1px 1px 2px rgb(255 255 255 / 50%); padding: 0 1em; line-height: 1em;">
-                        ${nome_do_aluno}
-                    </div>
-                </div>
-                ` };
+        // Variáveis Úteis
+        var aluno_nome = req.params.aluno;
+        var curso_nome = req.params.curso;
+        var aluno_id;
+        var curso_id;
+        var curso_imagem;
+        var caminho_imagem;
+        var nome_do_pdf;
+        var caminho_pdf;
+        var arquivo;
 
-                // Cria o PDF
-                html_to_pdf.generatePdf(file, {
-                    format: 'A4',
-                    landscape: true,
-                    path: path.resolve(__dirname, "pdfs", nome_do_pdf)
-                }).then(function(pdfBuffer) {
-                    // Se conseguir gerar o arquivo, registra na tabela de PDFs gerados
-                    PDF.create({
-                        aluno: nome_do_aluno,
-                        curso: nome_do_curso,
-                        link: caminho_pdf
-                    }).then(function() {
-                        // Envia o Link do PDF
-                        res.redirect(caminho_pdf);
-                    }).catch(function() {
-                        res.send("Erro ao Cadastrar Relação: " + erro);
+        // Verifica se o PDF já existe nos registros
+        PDF.findOne({
+            where: { aluno: aluno_nome, curso: curso_nome }
+        }).then(function(item) {
+            // Envia o Link do PDF se ele existir
+            res.redirect(item.link);
+        }).catch(function() {
+
+            // Verifica se o Aluno já está cadastrado e o Cadastra de não estiver
+            Aluno.findOrCreate({
+                where: { nome: aluno_nome},
+                defaults: { nome: aluno_nome }
+            }).then(function([item_aluno]) {
+
+                // Preenche as Variáveis
+                aluno_id = item_aluno.id;
+
+                Curso.findOne({ where: { nome: curso_nome } })
+                .then(function(item_curso) {
+                    curso_id = item_curso.id;
+                    curso_imagem = item_curso.imagem;
+
+                    // Verifica se o Aluno tem relação com o Curso e Cadastra a relação se não tiverem
+                    Relacao.findOrCreate({
+                        where: { alunoId: aluno_id, cursoId: curso_id },
+                        default: { alunoId: aluno_id, cursoId: curso_id }
+                    }).then(function(){
+
+                        // Variáveis para criar o PDF
+                        caminho_imagem = "http://localhost:8081/uploads/" + curso_imagem;
+                        nome_do_pdf = curso_nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '-').toLowerCase() + "-" + aluno_nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '-').toLowerCase() + ".pdf";
+                        caminho_pdf = "http://localhost:8081/pdfs/" + nome_do_pdf;
+                        arquivo = { content: `
+                        <img src="${caminho_imagem}" style="display: block; position: fixed; top: 0; right: 0; width: 100%; height: 100%; z-index: 0;" />
+                        <div style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; display: inline-table;">
+                            <div style="vertical-align: middle; display: table-cell; text-align: center; text-transform: uppercase; font-family: monospace; font-weight: bold; font-size: 3em; color: #272727; text-shadow: 1px 1px 2px rgb(255 255 255 / 50%); padding: 0 1em; line-height: 1em;">
+                                ${aluno_nome}
+                            </div>
+                        </div>
+                        ` };
+
+                        // Cria o PDF
+                        html_to_pdf.generatePdf(arquivo, {
+                            format: 'A4',
+                            landscape: true,
+                            path: path.resolve(__dirname, "pdfs", nome_do_pdf)
+                        }).then(function() {
+
+                            // Registra na tabela de PDFs gerados
+                            PDF.create({
+                                aluno: aluno_nome,
+                                curso: curso_nome,
+                                link: caminho_pdf
+                            }).then(function() {
+
+                                // Envia o Link do PDF
+                                res.redirect(caminho_pdf);
+                            });
+                        });
                     });
                 });
-            }).catch(function(){
-                // Se não constar na tabela de Relações
-                console.log("Registro não encontrado!");
-                res.redirect('http://localhost:8080/');
             });
         });
     });
